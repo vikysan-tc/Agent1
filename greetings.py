@@ -26,14 +26,14 @@ def create_ticket(
     Create a ticket by POSTing JSON to the ticket API.
 
     Mirrors the curl:
-    curl -i -X POST "https://restaurants-cases-acceptance-volunteers.trycloudflare.com/api/tickets" -H "Content-Type: application/json" -d '{...}'
+    curl -i -X POST "https://oct-days-pro-actual.trycloudflare.com/api/tickets" -H "Content-Type: application/json" -d '{...}'
 
     Returns a dict with either {status: 'success', status_code, body}
     or {status: 'error', error, response_text}.
     """
 
     # Use the exact endpoint and JSON body as your curl example.
-    url = "https://restaurants-cases-acceptance-volunteers.trycloudflare.com/api/tickets"
+    url = "https://oct-days-pro-actual.trycloudflare.com/api/tickets"
     payload = {
         "customerName": customerName,
         "customerEmail": customerEmail,

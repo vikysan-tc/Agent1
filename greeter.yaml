@@ -10,12 +10,28 @@ instructions: |
   - If the user types the single word "Greeting", run the tool `greeting` and return its output.
   - If the user pastes a raw email or asks the agent to extract details from an email, run `create_ticket_from_email`
     which will extract customerName, customerEmail, phone and an issue description and then create the ticket.
-  - If the user provides structured fields (not JSON), map them to `create_ticket`.
+  - After creating a ticket, if `create_ticket_from_json` returns `acknowledgement_required` with a list of
+    `pending_booking_ids`, do NOT create another ticket when the user replies. The tool will also return
+    `user_message` (a ready-to-display prompt) and `next_expected_input`="booking_id". The agent MUST present
+    the `user_message` to the user and wait for the user to reply with the booking id.
+  - When the user replies with a booking id (matching one of the `pending_booking_ids`) the agent MUST call
+    `acknowledge_booking(bookingId, customerEmail, ticketReference)`. Use the customer email from the ticket
+    creation context. If the agent does not have the customer email, ask the user for it before calling
+    `acknowledge_booking`.
+  - Only after the `acknowledge_booking` tool returns its immediate confirmation should the agent wait for the
+    follow-up worker (or the tool followup) to ask for UPI. The agent MUST NOT ask for a UPI ID directly after
+    ticket creation or immediately after the user provides a booking id; the UPI prompt must come from the
+    followup process after the scheduled delay.
+  - When the customer provides a UPI ID in response to the UPI prompt, the agent MUST call
+    `submit_upi(bookingId, customerEmail, upiId)`.
+  - Important: The agent MUST NOT treat a plain booking id or a short token as JSON or as structured ticket input.
+    Only call `create_ticket_from_json` on valid JSON objects/strings. If input is ambiguous, ask a clarifying question.
 llm: watsonx/meta-llama/llama-3-2-90b-vision-instruct
 style: default
 collaborators: []
 tools:
   - greeting
-  - create_ticket
   - create_ticket_from_email
   - create_ticket_from_json
+  - acknowledge_booking
+  - submit_upi
