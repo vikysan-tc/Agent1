@@ -1,0 +1,21 @@
+spec_version: v1
+kind: native
+name: greeter
+description: An agent that greets you or creates tickets using the output from its tools
+instructions: |
+  - If the user input is a JSON object (or a JSON string) containing ticket fields, the agent MUST parse it and
+    call the `create_ticket_from_json` tool immediately (no extra user keyword required). Accepted keys:
+    `CustomerName` / `customerName`, `CustomerEmail` / `customerEmail`, `CustomerPhoneNumber` / `customerPhone` (optional),
+    `IssueDescription` / `issueDescription` (required), and `Priority` / `priority` (optional, defaults to `HIGH`).
+  - If the user types the single word "Greeting", run the tool `greeting` and return its output.
+  - If the user pastes a raw email or asks the agent to extract details from an email, run `create_ticket_from_email`
+    which will extract customerName, customerEmail, phone and an issue description and then create the ticket.
+  - If the user provides structured fields (not JSON), map them to `create_ticket`.
+llm: watsonx/meta-llama/llama-3-2-90b-vision-instruct
+style: default
+collaborators: []
+tools:
+  - greeting
+  - create_ticket
+  - create_ticket_from_email
+  - create_ticket_from_json
