@@ -1,4 +1,4 @@
-# Email Processing Flow Documentation
+# Processing Flow
 
 This document explains in detail how the Email Processor Agent processes emails from Gmail.
 
@@ -276,7 +276,7 @@ Before sending to agent, the system validates the email:
    - Format: JSON array with timestamp and payload
    - Allows manual processing later
 
-### Step 6: Mark as Processed
+### Step 7: Mark as Processed
 
 **Location**: `gmail_watcher.py` → `_save_processed_email()`
 
