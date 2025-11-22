@@ -30,7 +30,7 @@ def _save_ack_store(d):
         pass
 
 # Primary tickets endpoint used by create_ticket
-TICKETS_URL = "https://oct-days-pro-actual.trycloudflare.com/api/tickets"
+TICKETS_URL = "https://desperate-bird-personal-viky-c10a64c7.koyeb.app/crmserver/api/tickets"
 
 
 @tool
@@ -53,7 +53,7 @@ def create_ticket(
     Create a ticket by POSTing JSON to the ticket API.
 
     Mirrors the curl:
-    curl -i -X POST "https://oct-days-pro-actual.trycloudflare.com/api/tickets" -H "Content-Type: application/json" -d '{...}'
+    curl -i -X POST "https://desperate-bird-personal-viky-c10a64c7.koyeb.app/crmserver/api/tickets" -H "Content-Type: application/json" -d '{...}'
 
     Returns a dict with either {status: 'success', status_code, body}
     or {status: 'error', error, response_text}.
