@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResolvX - AI Customer Complaint Resolver and Analyser</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>ResolvX</h1>
+                        <p class="tagline">AI Customer Complaint Resolver and Analyser</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="hero">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="fas fa-globe"></i>
+                        <span>Global Platform</span>
+                    </div>
+                    <h2 class="hero-title">Resolve Your Complaints with <span class="gradient-text">AI-Powered Solutions</span></h2>
+                    <p class="hero-description">
+                        ResolvX is a global platform designed to help you resolve customer complaints efficiently. 
+                        Whether it's a service issue, product problem, billing dispute, or any other concern, 
+                        our AI-powered system analyzes your complaint and ensures it reaches the right team for quick resolution.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">100+</div>
+                            <div class="stat-label">Companies</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">50K+</div>
+                            <div class="stat-label">Resolved</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Support</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="hero-image-placeholder">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                </div>
+            </section>
+
+            <section class="features">
+                <div class="section-header">
+                    <h2 class="section-title">Why Choose ResolvX?</h2>
+                    <p class="section-subtitle">Powerful features that make complaint resolution simple and efficient</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <h3>Global Reach</h3>
+                        <p>Works with companies worldwide across all industries and sectors</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>AI-Powered</h3>
+                        <p>Intelligent analysis and automatic routing of your complaints</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>Fast Resolution</h3>
+                        <p>Quick processing and priority-based handling for urgent matters</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>Secure & Private</h3>
+                        <p>Your information is protected and handled with utmost security</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="complaint-form-section">
+                <div class="form-header">
+                    <div class="form-icon-wrapper">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h2 class="form-title">Raise Your Complaint</h2>
+                    <p class="form-subtitle">Fill out the form below to submit your complaint. Our AI system will analyze it and ensure it reaches the appropriate team for quick resolution.</p>
+                </div>
+                
+                <form id="complaintForm" class="complaint-form">
+                    <div class="form-group">
+                        <label for="personalEmail">Your Email Address *</label>
+                        <input 
+                            type="email" 
+                            id="personalEmail" 
+                            name="personalEmail" 
+                            placeholder="your.email@example.com"
+                            required
+                        >
+                        <small class="form-help">We'll use this to send you updates about your complaint</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerName">Your Name *</label>
+                        <input 
+                            type="text" 
+                            id="customerName" 
+                            name="customerName" 
+                            placeholder="John Doe"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyName">Company Name *</label>
+                        <input 
+                            type="text" 
+                            id="companyName" 
+                            name="companyName" 
+                            placeholder="e.g., Amazon, Microsoft, Your Local Store"
+                            required
+                        >
+                        <small class="form-help">The company you want to raise a complaint against</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number (Optional)</label>
+                        <input 
+                            type="tel" 
+                            id="phoneNumber" 
+                            name="phoneNumber" 
+                            placeholder="+1 234 567 8900"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="problemDescription">Describe Your Problem *</label>
+                        <textarea 
+                            id="problemDescription" 
+                            name="problemDescription" 
+                            rows="6"
+                            placeholder="Please provide a detailed description of your complaint. Include relevant details such as order numbers, dates, transaction IDs, or any other information that might help resolve your issue."
+                            required
+                        ></textarea>
+                        <small class="form-help">Be as detailed as possible to help us understand and resolve your issue quickly</small>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Submit Complaint</span>
+                        <span class="btn-loader" id="btnLoader"></span>
+                    </button>
+                </form>
+
+                <div id="message" class="message"></div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 ResolvX. All rights reserved.</p>
+            <p class="footer-note">Powered by IBM Watsonx Orchestrate</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
