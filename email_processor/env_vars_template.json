@@ -1,0 +1,11 @@
+{
+  "GMAIL_WATCH_EMAIL": "reachus.sherlox@gmail.com",
+  "GMAIL_ACCESS_TOKEN": "",
+  "GMAIL_REFRESH_TOKEN": "",
+  "GMAIL_CLIENT_ID": "",
+  "GMAIL_CLIENT_SECRET": "",
+  "AGENT_WEBHOOK_URL": "",
+  "GMAIL_REPLY_EMAIL": "reachus.sherlox@gmail.com",
+  "GMAIL_POLL_INTERVAL": "60"
+}
+
