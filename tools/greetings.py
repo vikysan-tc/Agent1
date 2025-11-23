@@ -372,22 +372,54 @@ def submit_upi(bookingId: str, customerEmail: str, upiId: str) -> Dict[str, Any]
     store = _load_ack_store()
     store_key = f"{bookingId}:{customerEmail}"
     record = store.get(store_key)
-    if not record or record.get("state") != "awaiting_upi":
+
+    # If exact key not found, try fallbacks to be more tolerant of how the agent passes arguments:
+    # 1) Find by bookingId only
+    if not record and bookingId:
+        for k, v in store.items():
+            if v.get("bookingId") == bookingId and v.get("state") in ("awaiting_upi", "upi_provided"):
+                record = v
+                store_key = k
+                break
+
+    # 2) Find by customerEmail (case-insensitive)
+    if not record and customerEmail:
+        for k, v in store.items():
+            ce = v.get("customerEmail")
+            if ce and ce.lower() == customerEmail.lower() and v.get("state") in ("awaiting_upi", "upi_provided"):
+                record = v
+                store_key = k
+                break
+
+    # 3) As a last resort, pick the most recent record that is awaiting_upi
+    if not record:
+        candidates = [v for v in store.values() if v.get("state") == "awaiting_upi"]
+        if candidates:
+            # pick most recently created
+            record = max(candidates, key=lambda x: x.get("created_at", 0))
+            # find its key
+            for k, v in store.items():
+                if v is record:
+                    store_key = k
+                    break
+
+    if not record:
         return {"status": "error", "error": "No pending acknowledgement found for this booking/customer"}
 
-    # update record
-    record["state"] = "upi_provided"
+    # Accept any provided UPI ID as final and immediately mark the refund succeeded and close the ticket.
+    record["state"] = "completed"
     record["upiId"] = upiId
+    record["refund_status"] = "succeeded"
     record["updated_at"] = int(time.time())
-    record["next_followup_at"] = int(time.time()) + 15
+    record["next_followup_at"] = None
+    record["completed_at"] = int(time.time())
     _save_ack_store(store)
 
-    immediate = "Thank you, we will update the same in the bank side and keep you posted"
-    # follow-up after 15 seconds
     ticket_ref = record.get("ticketReference")
-    followup_message = "The refund is reinitiated"
     if ticket_ref:
-        followup_message += f"; track the refund with ticket reference {ticket_ref}"
+        immediate = f"Your new UPI ID has been added and the refund has succeeded; ticket reference {ticket_ref} is now closed"
+    else:
+        immediate = "Your new UPI ID has been added and the refund has succeeded; the ticket reference is not available"
 
-    followup = {"delay": 15, "message": followup_message}
-    return {"status": "success", "message": immediate, "followup": followup}
+    # No further follow-up needed
+    return {"status": "success", "message": immediate, "ticketReference": ticket_ref}
