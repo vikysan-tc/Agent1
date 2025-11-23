@@ -38,10 +38,10 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 # Configuration
 SENDER_EMAIL_NO_REPLY = os.environ.get('GMAIL_SENDER_EMAIL_NO_REPLY', 'noreply-sherlox@gmail.com')
-GMAIL_ACCESS_TOKEN_NO_REPLY = os.environ.get('GMAIL_ACCESS_TOKEN_NO_REPLY', 'ya29.a0ATi6K2uNM93OwC--WsxOhle002zpnQdBcBEA5I0L5LrcrxVcmQkswPSYJyLUY98h0e9kPEi2maTQSi-lC2kdvLZNODXhAUQNduf1yO1nDCBZRfBADgooZ3ixl7CS_N8Vy34S7Smu35GRxRz_BNIRhhYt6gHBSgVQKuntNEjLwCosBoHIy8Npwa75qA2EtsL38Pd-DUoaCgYKAdgSARQSFQHGX2MiG0l6CjMFQl2U8enzz-mAAA0206')
-GMAIL_REFRESH_TOKEN_NO_REPLY = os.environ.get('GMAIL_REFRESH_TOKEN_NO_REPLY', '1//0gQSnZxjYa7fLCgYIARAAGBASNwF-L9IrtTWc_iAnxCj-KGO6IZaJIm8b3Jt6TeXLGeMvIV0Ur5Y45iuA_Qfn1j4XUC-hAxk5Xe4')
-GMAIL_CLIENT_ID_NO_REPLY = os.environ.get('GMAIL_CLIENT_ID_NO_REPLY', '112412690204-7l5j4ldjhg8dj13rcj1v5vvcs4fj9ohr.apps.googleusercontent.com')
-GMAIL_CLIENT_SECRET_NO_REPLY = os.environ.get('GMAIL_CLIENT_SECRET_NO_REPLY', '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')
+GMAIL_ACCESS_TOKEN_NO_REPLY = os.environ.get('GMAIL_ACCESS_TOKEN_NO_REPLY', '')
+GMAIL_REFRESH_TOKEN_NO_REPLY = os.environ.get('GMAIL_REFRESH_TOKEN_NO_REPLY', '')
+GMAIL_CLIENT_ID_NO_REPLY = os.environ.get('GMAIL_CLIENT_ID_NO_REPLY', '')
+GMAIL_CLIENT_SECRET_NO_REPLY = os.environ.get('GMAIL_CLIENT_SECRET_NO_REPLY', '')
 TOKEN_PICKLE_FILE = os.path.join(os.path.dirname(__file__), 'gmail_token.pickle')
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), 'credentials.json')
 
