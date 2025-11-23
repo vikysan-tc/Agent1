@@ -14,6 +14,9 @@ import datetime
 # Gmail API configuration
 GMAIL_WATCH_EMAIL = os.environ.get('GMAIL_WATCH_EMAIL', 'reachus.sherlox@gmail.com')
 AGENT_WEBHOOK_URL = os.environ.get('AGENT_WEBHOOK_URL', '')  # URL to send processed emails to another agent
+AGENT_WEBHOOK_URL_LOCAL = os.environ.get('AGENT_WEBHOOK_URL_LOCAL', 'http://localhost:5000/webhook')  # Local greeter agent webhook
+AGENT_WEBHOOK_URL_PRODUCTION = os.environ.get('AGENT_WEBHOOK_URL_PRODUCTION', '')  # Production greeter agent webhook
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'local').lower()  # 'local' or 'production'
 GMAIL_API_BASE = os.environ.get('GMAIL_API_BASE', 'https://gmail.googleapis.com/gmail/v1')
 GMAIL_REPLY_EMAIL = os.environ.get('GMAIL_REPLY_EMAIL', 'reachus.sherlox@gmail.com')  # Email to send replies from
 GMAIL_ACCESS_TOKEN = os.environ.get('GMAIL_ACCESS_TOKEN', '')
@@ -417,12 +420,20 @@ def send_to_agent(payload: Dict[str, Any]) -> Dict[str, Any]:
     if missing_fields:
         return {"status": "error", "error": f"Missing required fields: {', '.join(missing_fields)}"}
     
+    # Determine which webhook URL to use based on environment
+    webhook_url = AGENT_WEBHOOK_URL
+    if not webhook_url:
+        if ENVIRONMENT == 'production' and AGENT_WEBHOOK_URL_PRODUCTION:
+            webhook_url = AGENT_WEBHOOK_URL_PRODUCTION
+        elif ENVIRONMENT == 'local' and AGENT_WEBHOOK_URL_LOCAL:
+            webhook_url = AGENT_WEBHOOK_URL_LOCAL
+    
     # If webhook URL is configured, send via HTTP POST
-    if AGENT_WEBHOOK_URL:
+    if webhook_url:
         try:
             headers = {"Content-Type": "application/json"}
             response = requests.post(
-                AGENT_WEBHOOK_URL,
+                webhook_url,
                 json=payload,
                 headers=headers,
                 timeout=10

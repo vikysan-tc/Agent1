@@ -67,13 +67,14 @@ def _save_processed_email(email_id: str):
         pass
 
 
-def _get_access_token() -> Optional[str]:
+def _get_access_token(force_refresh: bool = False) -> Optional[str]:
     """Get or refresh Gmail API access token."""
-    if GMAIL_ACCESS_TOKEN:
+    # If we have a stored access token and not forcing refresh, try it first
+    if GMAIL_ACCESS_TOKEN and not force_refresh:
         return GMAIL_ACCESS_TOKEN
     
+    # Try to refresh using refresh token
     if GMAIL_REFRESH_TOKEN and GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET:
-        # Refresh the token
         try:
             response = requests.post(
                 'https://oauth2.googleapis.com/token',
@@ -87,18 +88,40 @@ def _get_access_token() -> Optional[str]:
             )
             if response.status_code == 200:
                 data = response.json()
-                return data.get('access_token')
+                new_token = data.get('access_token')
+                if new_token:
+                    print("Successfully refreshed Gmail access token")
+                    return new_token
+            else:
+                print(f"Error refreshing token: HTTP {response.status_code} - {response.text}")
         except Exception as e:
             print(f"Error refreshing token: {e}")
+    else:
+        if not GMAIL_REFRESH_TOKEN:
+            print("WARNING: GMAIL_REFRESH_TOKEN not set")
+        if not GMAIL_CLIENT_ID:
+            print("WARNING: GMAIL_CLIENT_ID not set")
+        if not GMAIL_CLIENT_SECRET:
+            print("WARNING: GMAIL_CLIENT_SECRET not set")
+    
+    # If we have a stored access token (even if expired), return it as fallback
+    if GMAIL_ACCESS_TOKEN:
+        return GMAIL_ACCESS_TOKEN
     
     return None
 
 
-def _get_headers() -> Dict[str, str]:
+def _get_headers(force_refresh: bool = False) -> Dict[str, str]:
     """Get HTTP headers with authorization."""
-    token = _get_access_token()
+    token = _get_access_token(force_refresh=force_refresh)
     if not token:
-        raise ValueError("Gmail access token not available. Set GMAIL_ACCESS_TOKEN or configure OAuth2.")
+        raise ValueError(
+            "Gmail access token not available.\n"
+            "Please set one of the following:\n"
+            "1. GMAIL_ACCESS_TOKEN (direct access token)\n"
+            "2. GMAIL_REFRESH_TOKEN + GMAIL_CLIENT_ID + GMAIL_CLIENT_SECRET (for automatic refresh)\n"
+            "Or run setup_gmail_auth.py to set up authentication."
+        )
     
     return {
         'Authorization': f'Bearer {token}',
@@ -118,11 +141,26 @@ def _fetch_email_content(message_id: str) -> Optional[Dict[str, Any]]:
         url = f"{GMAIL_API_BASE}/users/{_get_user_id()}/messages/{message_id}?format=full"
         
         response = requests.get(url, headers=headers, timeout=10)
+        
+        # If we get a 401, try refreshing the token and retry once
+        if response.status_code == 401:
+            print(f"Received 401 Unauthorized for email {message_id}. Attempting to refresh token...")
+            token = _get_access_token(force_refresh=True)
+            if token:
+                headers = {
+                    'Authorization': f'Bearer {token}',
+                    'Content-Type': 'application/json'
+                }
+                response = requests.get(url, headers=headers, timeout=10)
+        
         if response.status_code != 200:
             print(f"Error fetching email {message_id}: {response.status_code}")
             return None
         
         return response.json()
+    except ValueError as e:
+        print(f"Authentication error fetching email {message_id}: {e}")
+        return None
     except Exception as e:
         print(f"Exception fetching email {message_id}: {e}")
         return None
@@ -185,16 +223,90 @@ def _list_messages(query: str = '', max_results: int = 10) -> List[str]:
         }
         
         response = requests.get(url, headers=headers, params=params, timeout=10)
+        
+        # If we get a 401, try refreshing the token and retry once
+        if response.status_code == 401:
+            print("Received 401 Unauthorized. Attempting to refresh token...")
+            # Force refresh the token
+            token = _get_access_token(force_refresh=True)
+            if token:
+                headers = {
+                    'Authorization': f'Bearer {token}',
+                    'Content-Type': 'application/json'
+                }
+                response = requests.get(url, headers=headers, params=params, timeout=10)
+        
         if response.status_code != 200:
-            print(f"Error listing messages: {response.status_code}")
+            error_msg = f"Error listing messages: {response.status_code}"
+            try:
+                error_data = response.json()
+                if 'error' in error_data:
+                    error_msg += f" - {error_data['error'].get('message', 'Unknown error')}"
+            except:
+                error_msg += f" - {response.text[:200]}"
+            print(error_msg)
+            
+            # Provide helpful error message for 401
+            if response.status_code == 401:
+                print("\n401 Unauthorized Error - Possible causes:")
+                print("1. Gmail access token is expired or invalid")
+                print("2. Gmail refresh token is expired or invalid")
+                print("3. OAuth2 credentials (CLIENT_ID, CLIENT_SECRET) are incorrect")
+                print("4. Required Gmail API scopes are not granted")
+                print("\nTo fix:")
+                print("- Run setup_gmail_auth.py to get new tokens")
+                print("- Or set GMAIL_ACCESS_TOKEN and GMAIL_REFRESH_TOKEN environment variables")
+                print("- Make sure Gmail API is enabled in Google Cloud Console")
+            
             return []
         
         data = response.json()
         messages = data.get('messages', [])
         return [msg['id'] for msg in messages]
+    except ValueError as e:
+        # This is raised by _get_headers() when token is not available
+        print(f"Authentication error: {e}")
+        return []
     except Exception as e:
         print(f"Exception listing messages: {e}")
         return []
+
+
+def _mark_email_as_read(message_id: str) -> bool:
+    """Mark an email as read in Gmail by removing the UNREAD label."""
+    try:
+        headers = _get_headers()
+        url = f"{GMAIL_API_BASE}/users/{_get_user_id()}/messages/{message_id}/modify"
+        
+        payload = {
+            'removeLabelIds': ['UNREAD']
+        }
+        
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        
+        # If we get a 401, try refreshing the token and retry once
+        if response.status_code == 401:
+            print(f"Received 401 Unauthorized when marking email {message_id} as read. Attempting to refresh token...")
+            token = _get_access_token(force_refresh=True)
+            if token:
+                headers = {
+                    'Authorization': f'Bearer {token}',
+                    'Content-Type': 'application/json'
+                }
+                response = requests.post(url, headers=headers, json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            print(f"Marked email {message_id} as read in Gmail")
+            return True
+        else:
+            print(f"Error marking email {message_id} as read: {response.status_code} - {response.text}")
+            return False
+    except ValueError as e:
+        print(f"Authentication error marking email {message_id} as read: {e}")
+        return False
+    except Exception as e:
+        print(f"Exception marking email {message_id} as read: {e}")
+        return False
 
 
 def _process_new_emails():
@@ -252,6 +364,8 @@ def _process_new_emails():
             if result.get('status') in ['success', 'partial']:
                 print(f"Successfully processed email {message_id}")
                 _save_processed_email(message_id)
+                # Mark email as read in Gmail
+                _mark_email_as_read(message_id)
             else:
                 print(f"Failed to process email {message_id}: {result.get('error', 'Unknown error')}")
                 

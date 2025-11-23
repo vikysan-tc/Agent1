@@ -37,7 +37,7 @@ document.getElementById('complaintForm').addEventListener('submit', async functi
     try {
         // Construct email content
         const emailSubject = `Complaint: ${companyName}`;
-        const emailBody = `Dear ResolvX Team,
+        const emailBody = `Dear CarePilot - the customer's co-pilot Team,
 
 I would like to raise a complaint regarding ${companyName}.
 
@@ -122,5 +122,80 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             });
         }
     });
+});
+
+// Load dashboard metrics for the metrics bar
+async function loadDashboardMetrics() {
+    // Use local proxy if available, otherwise direct API (may have CORS issues)
+    const USE_LOCAL_PROXY = true; // Set to false to use direct API
+    const LOCAL_PROXY_URL = 'http://localhost:8001';
+    const CRM_SERVER_URL = 'https://desperate-bird-personal-viky-c10a64c7.koyeb.app/crmserver';
+    const TICKETS_API_URL = USE_LOCAL_PROXY 
+        ? `${LOCAL_PROXY_URL}/api/tickets`
+        : `${CRM_SERVER_URL}/api/tickets`;
+    
+    const metricsBar = document.getElementById('dashboardMetricsBar');
+    if (!metricsBar) return;
+    
+    try {
+        // Create AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for metrics
+        
+        const response = await fetch(TICKETS_API_URL, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const tickets = Array.isArray(data) ? data : [data];
+        
+        // Calculate metrics
+        const totalTickets = tickets.length;
+        const highPriorityTickets = tickets.filter(t => 
+            (t.priority || '').toUpperCase() === 'HIGH'
+        ).length;
+        const resolvedTickets = tickets.filter(t => 
+            (t.status || '').toUpperCase() === 'RESOLVED' || 
+            (t.status || '').toUpperCase() === 'CLOSED'
+        ).length;
+        
+        // Update metrics display
+        document.getElementById('metricTotalTickets').textContent = totalTickets;
+        document.getElementById('metricHighPriority').textContent = highPriorityTickets;
+        document.getElementById('metricResolved').textContent = resolvedTickets;
+        
+        // Remove loading state
+        metricsBar.classList.remove('loading');
+        
+    } catch (error) {
+        console.error('Error loading dashboard metrics:', error);
+        // Set default values on error
+        document.getElementById('metricTotalTickets').textContent = '-';
+        document.getElementById('metricHighPriority').textContent = '-';
+        document.getElementById('metricResolved').textContent = '-';
+        metricsBar.classList.remove('loading');
+    }
+}
+
+// Load metrics when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const metricsBar = document.getElementById('dashboardMetricsBar');
+    if (metricsBar) {
+        metricsBar.classList.add('loading');
+        loadDashboardMetrics();
+        
+        // Refresh metrics every 30 seconds
+        setInterval(loadDashboardMetrics, 30000);
+    }
 });
 

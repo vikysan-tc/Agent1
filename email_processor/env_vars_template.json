@@ -5,7 +5,10 @@
   "GMAIL_CLIENT_ID": "",
   "GMAIL_CLIENT_SECRET": "",
   "AGENT_WEBHOOK_URL": "",
+  "AGENT_WEBHOOK_URL_LOCAL": "http://localhost:5000/webhook",
+  "AGENT_WEBHOOK_URL_PRODUCTION": "https://your-greeter-agent-server.com/webhook",
   "GMAIL_REPLY_EMAIL": "reachus.sherlox@gmail.com",
-  "GMAIL_POLL_INTERVAL": "60"
+  "GMAIL_POLL_INTERVAL": "60",
+  "ENVIRONMENT": "local"
 }
 

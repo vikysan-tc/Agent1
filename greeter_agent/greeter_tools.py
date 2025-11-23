@@ -1,4 +1,5 @@
-# greetings.py
+# greeter_tools.py
+# Tools for the greeter agent - self-contained in greeter_agent folder
 from ibm_watsonx_orchestrate.agent_builder.tools import tool
 import requests
 import json
@@ -7,6 +8,30 @@ from typing import Optional, Dict, Any
 from urllib.parse import quote_plus
 import os
 import time
+
+# Import email sender module
+try:
+    # Try relative import first (when used as package)
+    try:
+        from .email_sender import (
+            send_ticket_created_email,
+            send_booking_acknowledgement_email,
+            send_upi_request_email,
+            send_refund_reinitiated_email
+        )
+    except ImportError:
+        # Try absolute import (when used as standalone module)
+        from email_sender import (
+            send_ticket_created_email,
+            send_booking_acknowledgement_email,
+            send_upi_request_email,
+            send_refund_reinitiated_email
+        )
+    EMAIL_SENDER_AVAILABLE = True
+except ImportError:
+    # If email_sender is not available, continue without email functionality
+    EMAIL_SENDER_AVAILABLE = False
+    print("Warning: email_sender module not available. Email notifications will be disabled.")
 
 # simple persistent store for acknowledgement state
 ACK_STORE = os.path.join(os.path.dirname(__file__), 'ack_store.json')
@@ -48,7 +73,7 @@ def get_all_tickets() -> Dict[str, Any]:
     url = TICKETS_URL
     
     try:
-        resp = requests.get(url, timeout=10)
+        resp = requests.get(url, timeout=30)
         result = {
             "status_code": resp.status_code,
         }
@@ -119,7 +144,7 @@ def get_tickets_by_email(customerEmail: str) -> Dict[str, Any]:
     url = f"{bookings_url}?email={quote_plus(customerEmail)}"
     
     try:
-        resp = requests.get(url, timeout=10)
+        resp = requests.get(url, timeout=30)
         result = {
             "status_code": resp.status_code,
         }
@@ -219,7 +244,7 @@ def create_ticket(
 
     try:
         # send the JSON as raw data to match curl behavior closely
-        resp = requests.post(url, data=body_str, headers=headers, timeout=10)
+        resp = requests.post(url, data=body_str, headers=headers, timeout=30)
         # include response headers and body for debugging
         result = {
             "status_code": resp.status_code,
@@ -436,7 +461,7 @@ def create_ticket_from_json(payload: dict) -> Dict[str, Any]:
                 bookings_url = TICKETS_URL.replace('/api/tickets', '/api/tickets/bookings')
                 if customerEmail:
                     bookings_url = f"{bookings_url}?email={quote_plus(customerEmail)}"
-                bk_resp = requests.get(bookings_url, timeout=10)
+                bk_resp = requests.get(bookings_url, timeout=30)
                 if bk_resp.status_code == 200:
                     try:
                         bk_json = bk_resp.json()
@@ -487,6 +512,26 @@ def create_ticket_from_json(payload: dict) -> Dict[str, Any]:
             # Join parts into one user_message so the agent shows ticket confirmation and the prompt together
             result_out["user_message"] = "\n\n".join(parts) if parts else ""
 
+            # Send email notification to customer about ticket creation
+            if EMAIL_SENDER_AVAILABLE and customerEmail and customerName:
+                try:
+                    email_result = send_ticket_created_email(
+                        customer_email=customerEmail,
+                        customer_name=customerName,
+                        ticket_reference=ticket_ref,
+                        issue_description=issueDescription
+                    )
+                    if email_result.get("status") == "success":
+                        result_out["email_sent"] = True
+                        result_out["email_message_id"] = email_result.get("message_id")
+                    else:
+                        result_out["email_sent"] = False
+                        result_out["email_error"] = email_result.get("error", "Unknown error")
+                except Exception as e:
+                    # Don't fail the ticket creation if email fails
+                    result_out["email_sent"] = False
+                    result_out["email_error"] = str(e)
+
             return result_out
 
         # propagate error responses unchanged
@@ -524,7 +569,25 @@ def acknowledge_booking(bookingId: str, customerEmail: str, ticketReference: Opt
         "message": "The refund is on hold as the UPI ID for the given customer is inactive, kindly provide correct UPI ID",
         "requires_input": True,
     }
-    return {"status": "success", "message": immediate, "followup": followup}
+    
+    # Send email notification about booking acknowledgement
+    email_result = {}
+    if EMAIL_SENDER_AVAILABLE:
+        try:
+            email_result = send_booking_acknowledgement_email(
+                customer_email=customerEmail,
+                customer_name="Customer",  # We don't have name in this context
+                booking_id=bookingId,
+                ticket_reference=ticketReference
+            )
+        except Exception as e:
+            email_result = {"status": "error", "error": str(e)}
+    
+    result = {"status": "success", "message": immediate, "followup": followup}
+    if email_result:
+        result["email_notification"] = email_result
+    
+    return result
 
 
 @tool
@@ -556,4 +619,23 @@ def submit_upi(bookingId: str, customerEmail: str, upiId: str) -> Dict[str, Any]
         followup_message += f"; track the refund with ticket reference {ticket_ref}"
 
     followup = {"delay": 15, "message": followup_message}
-    return {"status": "success", "message": immediate, "followup": followup}
+    
+    # Send email notification about refund reinitiation
+    email_result = {}
+    if EMAIL_SENDER_AVAILABLE:
+        try:
+            email_result = send_refund_reinitiated_email(
+                customer_email=customerEmail,
+                customer_name="Customer",  # We don't have name in this context
+                booking_id=bookingId,
+                ticket_reference=ticket_ref
+            )
+        except Exception as e:
+            email_result = {"status": "error", "error": str(e)}
+    
+    result = {"status": "success", "message": immediate, "followup": followup}
+    if email_result:
+        result["email_notification"] = email_result
+    
+    return result
+

@@ -79,12 +79,12 @@ Set the following environment variables before running the application:
 export GMAIL_WATCH_EMAIL="reachus.sherlox@gmail.com"
 
 # Option 1: Direct Access Token (simpler, expires in ~1 hour)
-export GMAIL_ACCESS_TOKEN="ya29.a0AfH6SMBx..."
+$env:GMAIL_ACCESS_TOKEN="ya29.a0ATi6K2vIwM3yKJkc6JWKYf3X2DxPuAF4RQ1O8pd_YoEzSrdkDxU48RzhMWJhw2xQ9AWLah9KCA7ix6pfGPcuxxHPlX8q7NzyKEZlTYqfSKOPDNns79v6FPkwcDM_TG0hEloQ-sjBWW3C2x3l9wa0CcozLARRncdhKIW-z01yls2IkMDsp-O5bDond7WPE8LABthchokaCgYKAYsSARMSFQHGX2Miv9RiK8de6IeMSV67eVllKg0206"
 
 # Option 2: OAuth2 Refresh Token (recommended for production)
-export GMAIL_REFRESH_TOKEN="1//0g..."
-export GMAIL_CLIENT_ID="123456789-abc.apps.googleusercontent.com"
-export GMAIL_CLIENT_SECRET="GOCSPX-abc..."
+$env:GMAIL_REFRESH_TOKEN="1//0gVVUgvobNjdBCgYIARAAGBASNwF-L9IrTovkR-S3y652VQ4i55Uyo2jd37W2_OUWpSm3JhIsyC1xWfZyfCnBoTYVQb7aOu35tPg"
+$env:GMAIL_CLIENT_ID="509119598832-dli2515bfoqcelmlsgactiunja5ljgr5.apps.googleusercontent.com"
+$env:GMAIL_CLIENT_SECRET="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"
 ```
 
 ### Optional Variables
@@ -94,10 +94,10 @@ export GMAIL_CLIENT_SECRET="GOCSPX-abc..."
 export AGENT_WEBHOOK_URL="https://your-webhook-url.com/api/process"
 
 # Email address to send replies from (default: same as GMAIL_WATCH_EMAIL)
-export GMAIL_REPLY_EMAIL="reachus.sherlox@gmail.com"
+$env:GMAIL_REPLY_EMAIL="reachus.sherlox@gmail.com"
 
 # Polling interval in seconds (default: 60)
-export GMAIL_POLL_INTERVAL="60"
+$env:GMAIL_POLL_INTERVAL="60"
 ```
 
 ### Setting Environment Variables
@@ -279,4 +279,5 @@ Once local setup is working:
 - Gmail API Documentation: https://developers.google.com/gmail/api
 - Google OAuth 2.0 Guide: https://developers.google.com/identity/protocols/oauth2
 - IBM Watsonx Orchestrate Documentation: https://www.ibm.com/docs/en/watsonx-orchestrate
+
 

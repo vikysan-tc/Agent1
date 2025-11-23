@@ -1,6 +1,6 @@
-# ResolvX Landing Page
+# CarePilot - the customer's co-pilot Landing Page
 
-A modern, responsive landing page for ResolvX - AI Customer Complaint Resolver and Analyser.
+A modern, responsive landing page for CarePilot - the customer's co-pilot - AI Customer Complaint Resolver and Analyser.
 
 ## Features
 
@@ -30,24 +30,46 @@ The landing page opens **Gmail** with a pre-filled email to `reachus.sherlox@gma
 
 ### Using a Local Server (Recommended)
 
+**Important:** The dashboard requires API access. To avoid CORS issues, you need to run a proxy server.
+
+#### Step 1: Start the CORS Proxy Server
+
+Open a terminal and run:
+```bash
+cd resolvx_landing
+python proxy_server.py
+```
+
+This will start a proxy server on `http://localhost:8001` that adds CORS headers.
+
+#### Step 2: Start the Landing Page Server
+
+Open another terminal and run:
+
 1. **Using Python:**
    ```bash
    cd resolvx_landing
    python -m http.server 8000
    ```
-   Then open: `http://localhost:8000`
 
 2. **Using Node.js:**
    ```bash
    cd resolvx_landing
    npx http-server -p 8000
    ```
-   Then open: `http://localhost:8000`
 
 3. **Using VS Code:**
    - Install "Live Server" extension
    - Right-click on `index.html`
    - Select "Open with Live Server"
+
+#### Step 3: Access the Landing Page
+
+Open: `http://localhost:8000`
+
+**Note:** Keep both servers running (proxy on port 8001, landing page on port 8000) for the dashboard to work.
+
+For more CORS solutions, see [CORS_SETUP.md](CORS_SETUP.md)
 
 ## Form Fields
 
@@ -66,7 +88,7 @@ The form sends emails in a structured format that the email processor can easily
 Subject: Complaint: [Company Name] - [Priority] Priority
 
 Body:
-Dear ResolvX Team,
+Dear CarePilot - the customer's co-pilot Team,
 
 I would like to raise a complaint regarding [Company Name].
 
@@ -115,6 +137,30 @@ Change the target email in `script.js`:
 const TARGET_EMAIL = 'reachus.sherlox@gmail.com';
 ```
 
+## Deployment
+
+### Quick Deploy (5 minutes)
+
+For the fastest deployment, see [QUICK_DEPLOY.md](./QUICK_DEPLOY.md)
+
+### Full Deployment Guide
+
+For detailed deployment instructions including:
+- Multiple hosting options (Netlify, Vercel, GitHub Pages, AWS)
+- CORS configuration
+- Production setup
+- Troubleshooting
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+
+### Pre-Deployment Checklist
+
+Before deploying to production:
+1. Update `dashboard.js`: Set `USE_LOCAL_PROXY = false`
+2. Verify CRM server CORS configuration
+3. Test all functionality locally
+4. Review deployment guide for your chosen platform
+
 ## Browser Support
 
 - Chrome (latest)
@@ -124,5 +170,5 @@ const TARGET_EMAIL = 'reachus.sherlox@gmail.com';
 
 ## License
 
-This project is part of the ResolvX system.
+This project is part of the CarePilot - the customer's co-pilot system.
 

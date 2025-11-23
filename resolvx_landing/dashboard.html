@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarePilot Dashboard - the customer's co-pilot</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
+    <div class="container">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>CarePilot Dashboard</h1>
+                        <p class="tagline">Real-time ticket analytics and management</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="index.html" class="btn-back">
+                        <i class="fas fa-arrow-left"></i> Back to Landing
+                    </a>
+                    <button class="btn-refresh" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state">
+                <div class="loader"></div>
+                <p>Loading dashboard data...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-state" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p id="errorMessage">Failed to load dashboard data</p>
+                <button class="btn-retry" onclick="loadDashboard()">Retry</button>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div id="dashboardContent" style="display: none;">
+                <!-- Summary Cards -->
+                <section class="summary-section">
+                    <div class="summary-card">
+                        <div class="summary-icon" style="background: linear-gradient(135deg, #0f62fe 0%, #4589ff 100%);">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3 id="totalTickets">0</h3>
+                            <p>Total Tickets</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3 id="highPriorityTickets">0</h3>
+                            <p>High Priority</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3 id="resolvedTickets">0</h3>
+                            <p>Resolved</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3 id="totalCompanies">0</h3>
+                            <p>Companies</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Main Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Ticket List Section -->
+                    <section class="dashboard-section ticket-list-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-list"></i> Recent Tickets</h2>
+                            <div class="section-actions">
+                                <select id="filterPriority" class="filter-select">
+                                    <option value="all">All Priorities</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="LOW">Low</option>
+                                </select>
+                                <select id="filterCompany" class="filter-select">
+                                    <option value="all">All Companies</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="ticket-list" id="ticketList">
+                            <!-- Tickets will be populated here -->
+                        </div>
+                    </section>
+
+                    <!-- Company Metrics Section -->
+                    <section class="dashboard-section metrics-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-chart-bar"></i> Company Metrics</h2>
+                        </div>
+                        <div class="metrics-content">
+                            <canvas id="companyChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- Priority Distribution -->
+                    <section class="dashboard-section priority-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-pie-chart"></i> Priority Distribution</h2>
+                        </div>
+                        <div class="priority-content">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- High Priority Customers -->
+                    <section class="dashboard-section customers-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-users"></i> High Priority Customers</h2>
+                        </div>
+                        <div class="customers-list" id="highPriorityCustomers">
+                            <!-- High priority customers will be populated here -->
+                        </div>
+                    </section>
+
+                    <!-- Product Analysis (Company-wise) -->
+                    <section class="dashboard-section product-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-box"></i> Product Analysis</h2>
+                            <select id="productCompanyFilter" class="filter-select">
+                                <option value="">Select Company</option>
+                            </select>
+                        </div>
+                        <div class="product-content" id="productAnalysis">
+                            <p class="empty-state">Select a company to view product-wise ticket analysis</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Ticket Action Modal -->
+    <div id="ticketModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Ticket Actions</h2>
+                <button class="modal-close" onclick="closeTicketModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Ticket details and actions will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
+

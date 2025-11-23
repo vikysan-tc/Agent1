@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResolvX - AI Customer Complaint Resolver and Analyser</title>
+    <title>CarePilot - the customer's co-pilot</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,9 +27,38 @@
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <div class="logo-text">
-                        <h1>ResolvX</h1>
+                        <h1>CarePilot - the customer's co-pilot</h1>
                         <p class="tagline">Transforming complaint management through intelligent multi-agent automation across all customer touchpoints</p>
                     </div>
+                </div>
+                <div class="header-actions">
+                    <a href="dashboard.html" class="dashboard-metrics-bar" id="dashboardMetricsBar">
+                        <div class="metrics-bar-content">
+                            <div class="metrics-bar-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Dashboard</span>
+                            </div>
+                            <div class="metrics-bar-stats">
+                                <div class="metric-item">
+                                    <span class="metric-value" id="metricTotalTickets">-</span>
+                                    <span class="metric-label">Tickets</span>
+                                </div>
+                                <div class="metric-divider"></div>
+                                <div class="metric-item">
+                                    <span class="metric-value metric-high" id="metricHighPriority">-</span>
+                                    <span class="metric-label">High Priority</span>
+                                </div>
+                                <div class="metric-divider"></div>
+                                <div class="metric-item">
+                                    <span class="metric-value metric-resolved" id="metricResolved">-</span>
+                                    <span class="metric-label">Resolved</span>
+                                </div>
+                            </div>
+                            <div class="metrics-bar-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </header>
@@ -39,7 +68,7 @@
                 <div class="hero-content">
                     <div class="hero-badge">
                         <i class="fas fa-brain"></i>
-                        <span>Powered by IBM watsonx</span>
+                        <span>Powered by IBM Watsonx Orchestrate</span>
                     </div>
                     <h2 class="hero-title">AI Complaint Resolver: <span class="gradient-text">60% Faster Closure Rate</span></h2>
                     <p class="hero-description">
@@ -224,15 +253,15 @@
         <footer class="footer">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <h3>ResolvX</h3>
+                    <h3>CarePilot - the customer's co-pilot</h3>
                     <p>AI Complaint Resolver</p>
                 </div>
                 <div class="footer-powered">
-                    <p class="footer-note">Powered by <strong>IBM watsonx</strong></p>
+                    <p class="footer-note">Powered by <strong>IBM Watsonx Orchestrate</strong></p>
                     <p class="footer-team">Built by Team Sherlox | Toyota Connected India</p>
                 </div>
             </div>
-            <p class="footer-copyright">&copy; 2025 ResolvX. All rights reserved.</p>
+            <p class="footer-copyright">&copy; 2025 CarePilot - the customer's co-pilot. All rights reserved.</p>
         </footer>
     </div>
 

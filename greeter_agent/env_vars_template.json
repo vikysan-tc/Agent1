@@ -1,0 +1,16 @@
+{
+  "ORCHESTRATE_URL": "https://your-orchestrate-instance.cloud.ibm.com",
+  "ORCHESTRATE_API_KEY": "your-api-key-here",
+  "AGENT_NAME": "greeter",
+  "WEBHOOK_PORT": "5000",
+  "WEBHOOK_HOST": "0.0.0.0",
+  "FOLLOWUP_WEBHOOK": "http://your-webhook-url.com/followup",
+  "FOLLOWUP_POLL_INTERVAL": "2",
+  "FLASK_DEBUG": "False",
+  "GMAIL_SENDER_EMAIL": "noreply-sherlox@gmail.com",
+  "GMAIL_ACCESS_TOKEN": "",
+  "GMAIL_REFRESH_TOKEN": "",
+  "GMAIL_CLIENT_ID": "",
+  "GMAIL_CLIENT_SECRET": ""
+}
+

@@ -4,6 +4,147 @@ import requests
 import json
 import re
 from typing import Optional, Dict, Any
+from urllib.parse import quote_plus
+
+
+@tool
+def get_all_tickets() -> Dict[str, Any]:
+    """
+    Retrieve all tickets from the CRM server using GET API.
+    
+    GET https://desperate-bird-personal-viky-c10a64c7.koyeb.app/crmserver/api/tickets
+    
+    Returns a dict with either {status: 'success', status_code, body, tickets}
+    or {status: 'error', error, response_text}.
+    """
+    url = "https://desperate-bird-personal-viky-c10a64c7.koyeb.app/crmserver/api/tickets"
+    
+    try:
+        resp = requests.get(url, timeout=10)
+        result = {
+            "status_code": resp.status_code,
+        }
+        
+        try:
+            result["body"] = resp.json()
+            tickets = result["body"] if isinstance(result["body"], list) else [result["body"]]
+            result["tickets"] = tickets
+        except ValueError:
+            result["body"] = resp.text
+            result["tickets"] = []
+        
+        if 200 <= resp.status_code < 300:
+            # Display ticket details in console
+            print("\n" + "="*80)
+            print("ALL TICKETS")
+            print("="*80)
+            print(f"Status Code: {resp.status_code}")
+            print(f"Total Tickets: {len(result.get('tickets', []))}")
+            print("-"*80)
+            for idx, ticket in enumerate(result.get('tickets', []), 1):
+                print(f"\nTicket #{idx}:")
+                if isinstance(ticket, dict):
+                    for key, value in ticket.items():
+                        print(f"  {key}: {value}")
+                else:
+                    print(f"  {ticket}")
+            print("="*80 + "\n")
+            return {"status": "success", **result}
+        else:
+            print(f"\nERROR: Failed to get tickets. Status Code: {resp.status_code}")
+            print(f"Response: {result.get('body', 'No response body')}\n")
+            return {"status": "error", "error": f"HTTP {resp.status_code}", **result}
+    
+    except requests.RequestException as e:
+        print(f"\nERROR: Exception while getting tickets: {str(e)}\n")
+        resp_text = None
+        status_code = None
+        if getattr(e, "response", None) is not None:
+            try:
+                status_code = e.response.status_code
+            except Exception:
+                status_code = None
+            try:
+                resp_text = e.response.text
+            except Exception:
+                resp_text = None
+        
+        return {
+            "status": "error",
+            "error": str(e),
+            "status_code": status_code,
+            "response_text": resp_text,
+        }
+
+
+@tool
+def get_tickets_by_email(customerEmail: str) -> Dict[str, Any]:
+    """
+    Retrieve tickets for a specific customer email using GET API.
+    
+    GET https://desperate-bird-personal-viky-c10a64c7.koyeb.app/crmserver/api/tickets/bookings?email={email}
+    
+    Returns a dict with either {status: 'success', status_code, body, tickets}
+    or {status: 'error', error, response_text}.
+    """
+    url = f"https://desperate-bird-personal-viky-c10a64c7.koyeb.app/crmserver/api/tickets/bookings?email={quote_plus(customerEmail)}"
+    
+    try:
+        resp = requests.get(url, timeout=10)
+        result = {
+            "status_code": resp.status_code,
+        }
+        
+        try:
+            result["body"] = resp.json()
+            tickets = result["body"] if isinstance(result["body"], list) else [result["body"]]
+            result["tickets"] = tickets
+        except ValueError:
+            result["body"] = resp.text
+            result["tickets"] = []
+        
+        if 200 <= resp.status_code < 300:
+            # Display ticket details in console
+            print("\n" + "="*80)
+            print(f"TICKETS FOR EMAIL: {customerEmail}")
+            print("="*80)
+            print(f"Status Code: {resp.status_code}")
+            print(f"Total Tickets: {len(result.get('tickets', []))}")
+            print("-"*80)
+            for idx, ticket in enumerate(result.get('tickets', []), 1):
+                print(f"\nTicket #{idx}:")
+                if isinstance(ticket, dict):
+                    for key, value in ticket.items():
+                        print(f"  {key}: {value}")
+                else:
+                    print(f"  {ticket}")
+            print("="*80 + "\n")
+            return {"status": "success", **result}
+        else:
+            print(f"\nERROR: Failed to get tickets by email. Status Code: {resp.status_code}")
+            print(f"Response: {result.get('body', 'No response body')}\n")
+            return {"status": "error", "error": f"HTTP {resp.status_code}", **result}
+    
+    except requests.RequestException as e:
+        print(f"\nERROR: Exception while getting tickets by email: {str(e)}\n")
+        resp_text = None
+        status_code = None
+        if getattr(e, "response", None) is not None:
+            try:
+                status_code = e.response.status_code
+            except Exception:
+                status_code = None
+            try:
+                resp_text = e.response.text
+            except Exception:
+                resp_text = None
+        
+        return {
+            "status": "error",
+            "error": str(e),
+            "status_code": status_code,
+            "response_text": resp_text,
+        }
 
 
 @tool
@@ -62,9 +203,32 @@ def create_ticket(
             result["body"] = resp.text
 
         if 200 <= resp.status_code < 300:
+            # Display ticket details in console
+            print("\n" + "="*80)
+            print("TICKET CREATED SUCCESSFULLY")
+            print("="*80)
+            if isinstance(result.get("body"), dict):
+                ticket_data = result["body"]
+                print(f"Status Code: {resp.status_code}")
+                for key, value in ticket_data.items():
+                    print(f"  {key}: {value}")
+            else:
+                print(f"Status Code: {resp.status_code}")
+                print(f"Response: {result.get('body')}")
+            print("="*80 + "\n")
+            
+            # After creating ticket, fetch and display all tickets for this customer
+            if customerEmail:
+                try:
+                    get_tickets_by_email(customerEmail)
+                except Exception as e:
+                    print(f"Warning: Could not fetch tickets by email: {e}")
+            
             return {"status": "success", **result}
         else:
             # Non-2xx, return structured error info so the caller can see details
+            print(f"\nERROR: Failed to create ticket. Status Code: {resp.status_code}")
+            print(f"Response: {result.get('body', 'No response body')}\n")
             return {"status": "error", "error": f"HTTP {resp.status_code}", **result}
 
     except requests.RequestException as e:
